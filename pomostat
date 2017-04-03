@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+
+import os
+import argparse
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
+from datetime import timedelta
+import calendar
+from datetime import timedelta
+
+
+filename = os.path.join(os.getenv("HOME"), ".pomodoro")
+
+
+def load():
+    data = pd.read_csv(filename,
+                       parse_dates=["start"])
+    data = (data.loc[data["work"] == "work"])
+    data["day"] = data["start"]
+    data["day"] = data["day"].apply(lambda x: x.date())
+    return data
+
+
+def load_duration_per_day(data):
+    duration_per_day = data.groupby("day").sum() / 60.
+    duration_per_day.index = duration_per_day.index.to_datetime()
+    return duration_per_day
+
+
+def load_duration_per_day_full(duration_per_day):
+    d = pd.date_range(duration_per_day.index[0], duration_per_day.index[-1])
+    e = pd.DataFrame(index=d)
+    #duration_per_day_full = pd.merge(e, duration_per_day, how='left', left_index=True, right_index=True)
+    duration_per_day_full = pd.merge(e, duration_per_day, how='left', left_index=True, right_index=True)
+    duration_per_day_full["duration"] = duration_per_day_full["duration"].fillna(0)
+    return duration_per_day_full
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='pomostats')
+    parser.add_argument("action", default="overall", help="overall|days|weeks|stats|today|yesterday|thisweek|lastweek")
+    parser.add_argument("--nbweeks", default=0, type=int)
+    args = parser.parse_args()
+
+    data = load()
+    if args.action == "overall":
+        duration_per_day = load_duration_per_day(data)
+        duration_per_day.plot(figsize=(8, 8), x_compat=True)
+        plt.show()
+    elif args.action in ("days", "thisweek", "lastweek"):
+        if args.action == "thisweek":
+            nbweeks = 0
+        elif args.action == "lastweek":
+            nbweeks = 1
+        else:
+            nbweeks = args.nbweeks
+        D = data.copy()
+        weekmap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        D["day"] = D["start"].map(lambda x:x.weekday())
+        D["dayname"] = D["start"].map(lambda x:weekmap[x.weekday()])
+
+        sum_up = False
+        previous_weeks = nbweeks# if -1 consider previous_n_weeks, if >= 0 consider current week for 0, then previous week etc
+        last_monday = (datetime.today().date()) - timedelta(days=datetime.today().weekday())
+        last_monday -= previous_weeks * timedelta(days=7)
+        next_sunday = last_monday + timedelta(days=6)
+        next_monday = last_monday + timedelta(days=7)
+        if previous_weeks >= 0:
+            D = D[D.start>=last_monday]
+        if sum_up is False:
+            D = D[D.start< next_monday]
+        D = D.groupby(by=("day", "dayname"))
+        D = D.sum()/60.
+        A = D
+        D = D.reset_index().plot(kind="bar", title="hours per day",
+                                 figsize=(8, 8),
+                                 x="dayname", y="duration")
+        plt.title("total:{}".format(A.sum()))
+        plt.show()
+    elif args.action == "stats":
+        per_day = (data.groupby(by="day")).sum()/60.
+        print("per day : {}+/-{}".format(per_day.values.mean(), per_day.values.std()))
+    elif args.action == "weeks":
+        week = lambda x: x.isocalendar()[1]
+        year = lambda x: x.isocalendar()[0]
+        data['week'] = data['day'].apply(week)
+        data['year'] = data['day'].apply(year)
+        data = data.groupby(('week', 'year')).sum()/60
+        data = data.reset_index()
+        data = data.sort_values(by=['year', 'week'], ascending=[True, True])
+        data['weekyear'] = data['week'] + (data['year'] - data['year'].min()) * 52
+        print(data)
+        data.plot(title="hours per week", x='weekyear', y='duration')
+        plt.axhline(y=data['duration'].max(), c='green', ls='dashed')
+        plt.show()
+    elif args.action == "today" or args.action == "yesterday":
+        if args.action == "yesterday":
+            d = 1
+        else:
+            d = 0
+        today = datetime.today().date() - timedelta(d)
+        D = data[data["start"] >= today]
+        print("{:.3f} h".format(D["duration"].sum() / 60.))
