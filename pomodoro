@@ -100,7 +100,6 @@ def main(work=60, rest=5, *, repeat=10, alarm=True, notif=False):
             notify('pomodoro', 'Finished rest, work now.')
         display("Cycle complete")
         i += 1
-    return 0
 
 
 if __name__ == "__main__":
