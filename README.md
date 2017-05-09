@@ -29,7 +29,7 @@ To do that, you can do:
 
   pomodoro 60 5 --notif=True --alarm=False
 
-Warning : notif needs pyqt5 (https://pypi.python.org/pypi/PyQt5/5.8.2)
+**Warning** : notif needs pyqt5 (https://pypi.python.org/pypi/PyQt5/5.8.2)
 
 ## Statistics
 
