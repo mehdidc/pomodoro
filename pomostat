@@ -34,7 +34,6 @@ def load_duration_per_day(data):
 def load_duration_per_day_full(duration_per_day):
     d = pd.date_range(duration_per_day.index[0], duration_per_day.index[-1])
     e = pd.DataFrame(index=d)
-    #duration_per_day_full = pd.merge(e, duration_per_day, how='left', left_index=True, right_index=True)
     duration_per_day_full = pd.merge(e, duration_per_day, how='left', left_index=True, right_index=True)
     duration_per_day_full["duration"] = duration_per_day_full["duration"].fillna(0)
     return duration_per_day_full
@@ -42,6 +41,7 @@ def load_duration_per_day_full(duration_per_day):
 def main(action='overall', *, nbweeks=0):
     """
     action can be :
+
         overall : all pomodoros together in a plot
 
         days : nb of hours per day overall
