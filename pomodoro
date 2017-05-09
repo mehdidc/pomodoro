@@ -10,14 +10,17 @@ import os
 
 display = print
 this_dir = os.path.dirname(__file__)
-ALARM = "{0}/clock.mp3".format(this_dir)
+ALARM = "{}/../../clock.mp3".format(this_dir)
 DATA_FILENAME = os.getenv("HOME") + "/.pomodoro"
 DEV_NULL = open("/dev/null","w")
 
 
 def notify(title, content, more=''):
-    from PyQt5.QtWidgets import QMessageBox
-    from PyQt5.Qt import QApplication
+    try:
+        from PyQt5.QtWidgets import QMessageBox
+        from PyQt5.Qt import QApplication
+    except ImportError:
+        return
     app = QApplication(sys.argv)
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Information)
@@ -40,10 +43,12 @@ def tick(duration):
 
 
 def play_alarm(filename):
-    "Plays the alarm sound specified by alarm"
     cmd = ["mpg123", filename]
-    p = subprocess.Popen(cmd, stdout = DEV_NULL, stderr = subprocess.PIPE)
-    p.wait()
+    try:
+        p = subprocess.Popen(cmd, stdout=DEV_NULL, stderr=subprocess.PIPE)
+        p.wait()
+    except SubprocessError:
+        pass
 
 
 def write_pomo(start, stop, tag):
@@ -55,7 +60,19 @@ def write_pomo(start, stop, tag):
     fd.close()
 
 
-def main(work=60, rest=5, *, repeat=float('inf'), alarm=True, notif=False):
+def main(work=60, rest=5, *, repeat=10, alarm=True, notif=False):
+    """
+    work : int
+        nb of minuntes of work
+    rest : int
+        nb of minutes of rest
+    repeat : int
+        nb of cycles work-rest to do
+    alarm : bool
+        whether to play an alarm each time a pomodoro is finished or started
+    notif : bool
+        whether to send a message box each time a pomodoro is finished or started
+    """
     i = 0
     while i < repeat:
         display("Work now")
