@@ -14,8 +14,9 @@ pip install git+https://github.com/mehdidc/pomodoro
 
 ## How to use it?
 
-  ...bash
+```bash
   pomodoro 60 5
+```
 
 will run pomodoro cycles of 60mins of work and 5mins of rest. 
 By default an alarm sound will be played at the end of pomodoros.
@@ -23,14 +24,16 @@ By default an alarm sound will be played at the end of pomodoros.
 
 it can be disabled using:
   
-  :::bash
+```bash
   pomodoro 60 5 --alarm=False
+```
 
 Instead of an alarm, you might rather want to receive a message box each time you finish a pomodoro. 
 To do that, you can do:
 
-  :::bash
+```bash
   pomodoro 60 5 --notif=True --alarm=False
+```
 
 **Warning** : notif needs pyqt5 (https://pypi.python.org/pypi/PyQt5/5.8.2)
 
@@ -38,7 +41,7 @@ To do that, you can do:
 
 each time a pomodoro is performed, its recorded on a small text database in your HOME/.pomodoro. To visualize the statistics of your pomodoros, you can use pomostat. Here are some examples:
 
-  :::bash
+```bash
   pomostat overall
   pomostat days
   pomostat thisweek
@@ -47,3 +50,4 @@ each time a pomodoro is performed, its recorded on a small text database in your
   pomostat weeks
   pomostat today
   pomostat yesterday
+```
