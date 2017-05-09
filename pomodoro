@@ -1,120 +1,89 @@
 #!/usr/bin/env python
-# Source : http://code.activestate.com/recipes/577358-pomodoro-timer/
-"""
-Emulates a pomodoro timer.
-
-The program is invoked with a "work duration" and a "rest duration".
-It plays a ticking sound for the work duration (specified in minutes) and then an alarm.
-After that it plays another tick for the rest duration (also specified in minutes).
-
-If the PyOSD library is available, it will use it to display messages
-on the screen. Otherwise, it simply prints them out to stdout.
-
-This is usually invoked as
-./ticker.py 30 5
-This means that you work for 30 minutes and then rest for 5.
-
-For details on the Pomodoro technique, please refer http://www.pomodorotechnique.com/
-For the sound files, please check out http://www.soundjay.com/clock-sounds-1.html
-
-This script is an attempt to create an offline version of http://www.focusboosterapp.com/live.cfm
-
-"""
-
+# Adapted from : http://code.activestate.com/recipes/577358-pomodoro-timer/
+from clize import run
 import sys
 import time
 import subprocess
 from datetime import datetime
 import os
 
-pyosd = False
-try:
-    import pyosd
-    osd = pyosd.osd()
-    osd.set_align(pyosd.ALIGN_CENTER)
-    osd.set_pos(pyosd.POS_MID)
-    display = osd.display
-except:
-    display = lambda x: sys.stdout.write(str(x)+"\n")
-
-
+display = print
 this_dir = os.path.dirname(__file__)
+ALARM = "{0}/clock.mp3".format(this_dir)
+DATA_FILENAME = os.getenv("HOME") + "/.pomodoro"
+DEV_NULL = open("/dev/null","w")
 
-WORK_TICK = ""
-REST_TICK = ""
-ALARM     = "{0}/clock.mp3".format(this_dir)
-DEV_NULL  = open("/dev/null","w")
 
-def sweet():
-    cmd = ["cowsay -f $(ls /usr/share/cows/|shuf|tail -n 1) $(fortune)"]
-    p = subprocess.Popen(cmd, shell=True)
-    p.wait()
+def notify(title, content, more=''):
+    from PyQt5.QtWidgets import QMessageBox
+    from PyQt5.Qt import QApplication
+    app = QApplication(sys.argv)
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Information)
+    msg.setText(content)
+    msg.setWindowTitle(title)
+    msg.setDetailedText(more)
+    msg.show()
+    app.exec_()
 
-def tick(duration, tick):
-    "Plays a the ticking sound specified by tick for duration time"
-    cmd = ["mpg123", "--loop", "-1" , tick]
-    p = subprocess.Popen(cmd, stdout = DEV_NULL, stderr = subprocess.PIPE)
-    interrupt = False
+def tick(duration):
     try:
         time.sleep(duration)
     except KeyboardInterrupt:
         display("Interrupting")
         interrupt = True
-    p.kill()
+    else:
+        interrupt = False
     return interrupt
 
-def alarm(alarm):
+
+def play_alarm(filename):
     "Plays the alarm sound specified by alarm"
-    cmd = ["mpg123", alarm]
+    cmd = ["mpg123", filename]
     p = subprocess.Popen(cmd, stdout = DEV_NULL, stderr = subprocess.PIPE)
     p.wait()
+
 
 def write_pomo(start, stop, tag):
     duration = (stop - start).total_seconds() / 60.
     line = "{0},{1},{2},{3}\n".format(tag, start, stop, duration)
-    filename = os.getenv("HOME") + "/.pomodoro"
+    filename = DATA_FILENAME 
     fd = open(filename, "a")
     fd.write(line)
     fd.close()
 
-def main(args):
-    if len(args[1:]) != 2:
-        print(("Usage : %s work_time rest_time nb=-1"+args[0]))
-        return -1
-    twork, trest = args[1:3]
-    if len(args) == 4:
-        nb = int(args[3])
-    else:
-        nb = float('inf')
 
+def main(work=60, rest=5, *, repeat=float('inf'), alarm=True, notif=False):
     i = 0
-    while i < nb:
-
+    while i < repeat:
         display("Work now")
         start = datetime.now()
-        interrupted = tick(int(twork)*60, WORK_TICK)
+        interrupted = tick(int(work)*60)
         if interrupted:
             break
         stop = datetime.now()
-
         write_pomo(start, stop, "work")
-
-        alarm(ALARM)
+        if alarm:
+            play_alarm(ALARM)
+        if notif:
+            notify('pomodoro', 'Finished pomo, rest now.')
+        break
         display("Rest now")
-
-        #sweet()
-
         start = datetime.now()
-        interrupted = tick(int(trest)*60, REST_TICK)
+        interrupted = tick(int(rest)*60)
         if interrupted:
             break
         stop = datetime.now()
         write_pomo(start, stop, "rest")
 
-        alarm(ALARM)
+        if alarm:
+            play_alarm(ALARM)
+        if notif:
+            notify('pomodoro', 'Finished rest, work now.')
         display("Cycle complete")
         i += 1
     return 0
 
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    run(main)

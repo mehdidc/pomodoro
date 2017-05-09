@@ -11,6 +11,7 @@ from datetime import timedelta
 import calendar
 from datetime import timedelta
 
+from clize import run
 
 filename = os.path.join(os.getenv("HOME"), ".pomodoro")
 
@@ -38,24 +39,19 @@ def load_duration_per_day_full(duration_per_day):
     duration_per_day_full["duration"] = duration_per_day_full["duration"].fillna(0)
     return duration_per_day_full
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='pomostats')
-    parser.add_argument("action", default="overall", help="overall|days|weeks|stats|today|yesterday|thisweek|lastweek")
-    parser.add_argument("--nbweeks", default=0, type=int)
-    args = parser.parse_args()
-
+def main(action='overall', *, nbweeks=0):
     data = load()
-    if args.action == "overall":
+    if action == "overall":
         duration_per_day = load_duration_per_day(data)
         duration_per_day.plot(figsize=(8, 8), x_compat=True)
         plt.show()
-    elif args.action in ("days", "thisweek", "lastweek"):
-        if args.action == "thisweek":
+    elif action in ("days", "thisweek", "lastweek"):
+        if action == "thisweek":
             nbweeks = 0
-        elif args.action == "lastweek":
+        elif action == "lastweek":
             nbweeks = 1
         else:
-            nbweeks = args.nbweeks
+            nbweeks = nbweeks
         D = data.copy()
         weekmap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         D["day"] = D["start"].map(lambda x:x.weekday())
@@ -74,15 +70,17 @@ if __name__ == "__main__":
         D = D.groupby(by=("day", "dayname"))
         D = D.sum()/60.
         A = D
-        D = D.reset_index().plot(kind="bar", title="hours per day",
-                                 figsize=(8, 8),
-                                 x="dayname", y="duration")
+        D = D.reset_index().plot(
+            kind="bar", 
+            title="hours per day",
+            figsize=(8, 8),
+            x="dayname", y="duration")
         plt.title("total:{}".format(A.sum()))
         plt.show()
-    elif args.action == "stats":
+    elif action == "stats":
         per_day = (data.groupby(by="day")).sum()/60.
         print("per day : {}+/-{}".format(per_day.values.mean(), per_day.values.std()))
-    elif args.action == "weeks":
+    elif action == "weeks":
         week = lambda x: x.isocalendar()[1]
         year = lambda x: x.isocalendar()[0]
         data['week'] = data['day'].apply(week)
@@ -95,11 +93,14 @@ if __name__ == "__main__":
         data.plot(title="hours per week", x='weekyear', y='duration')
         plt.axhline(y=data['duration'].max(), c='green', ls='dashed')
         plt.show()
-    elif args.action == "today" or args.action == "yesterday":
-        if args.action == "yesterday":
+    elif action == "today" or action == "yesterday":
+        if action == "yesterday":
             d = 1
         else:
             d = 0
         today = datetime.today().date() - timedelta(d)
         D = data[data["start"] >= today]
         print("{:.3f} h".format(D["duration"].sum() / 60.))
+
+if __name__ == "__main__":
+    run(main)
