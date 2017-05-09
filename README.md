@@ -14,7 +14,7 @@ pip install git+https://github.com/mehdidc/pomodoro
 
 ## How to use it?
 
-  :::bash
+  ...bash
   pomodoro 60 5
 
 will run pomodoro cycles of 60mins of work and 5mins of rest. 
