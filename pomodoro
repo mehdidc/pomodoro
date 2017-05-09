@@ -54,8 +54,11 @@ def play_alarm(filename):
 def write_pomo(start, stop, tag):
     duration = (stop - start).total_seconds() / 60.
     line = "{0},{1},{2},{3}\n".format(tag, start, stop, duration)
-    filename = DATA_FILENAME 
-    fd = open(filename, "a")
+    if not os.path.exists(DATA_FILENAME):
+        fd = open(DATA_FILENAME, "w")
+        fd.write("work,start,end,duration\n")
+    else:
+        fd = open(DATA_FILENAME, "a")
     fd.write(line)
     fd.close()
 
