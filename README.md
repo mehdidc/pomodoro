@@ -10,7 +10,11 @@ The code is based on : <http://code.activestate.com/recipes/577358-pomodoro-time
 
 ## How to install ?
 
-pip install git+https://github.com/mehdidc/pomodoro
+```bash
+    git clone https://github.com/mehdidc/pomodoro
+    cd pomodoro
+    python setup.py install
+```
 
 ## How to use it?
 
