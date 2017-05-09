@@ -40,6 +40,17 @@ def load_duration_per_day_full(duration_per_day):
     return duration_per_day_full
 
 def main(action='overall', *, nbweeks=0):
+    """
+    action can be :
+        overall : all pomodoros together in a plot
+        days : nb of hours per day overall
+        thisweek : nb of hours per day this week
+        lastweek : nb of hours per day last week
+        stats : some stats
+        weeks : nb of hours per week
+        today : nb hours today
+        yesterday : nb hours yesterday
+    """
     data = load()
     if action == "overall":
         duration_per_day = load_duration_per_day(data)
