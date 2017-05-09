@@ -23,5 +23,6 @@ setup(
     platforms='any',
     scripts=['pomodoro', 'pomostat'],
     include_package_data=True,
-    data_files=['clock.mp3']
+    data_files=['clock.mp3'],
+    install_requires=['clize'],
 )
