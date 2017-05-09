@@ -1,4 +1,4 @@
-#Pomodoro
+# Pomodoro
 
 Simple command line pomodoro app with visualization of statistics.
 The Pomodoro technique is a time management technique for improving productivity.
