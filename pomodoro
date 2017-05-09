@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime
 import os
 
+
 display = print
 this_dir = os.path.dirname(__file__)
 ALARM = "{0}/clock.mp3".format(this_dir)
@@ -24,7 +25,8 @@ def notify(title, content, more=''):
     msg.setWindowTitle(title)
     msg.setDetailedText(more)
     msg.show()
-    app.exec_()
+    app.exec()
+
 
 def tick(duration):
     try:
@@ -67,7 +69,6 @@ def main(work=60, rest=5, *, repeat=float('inf'), alarm=True, notif=False):
             play_alarm(ALARM)
         if notif:
             notify('pomodoro', 'Finished pomo, rest now.')
-        break
         display("Rest now")
         start = datetime.now()
         interrupted = tick(int(rest)*60)
