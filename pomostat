@@ -27,7 +27,7 @@ def load():
 
 def load_duration_per_day(data):
     duration_per_day = data.groupby("day").sum() / 60.
-    duration_per_day.index = duration_per_day.index.to_datetime()
+    duration_per_day.index = pd.to_datetime(duration_per_day.index)
     return duration_per_day
 
 
@@ -38,38 +38,38 @@ def load_duration_per_day_full(duration_per_day):
     duration_per_day_full["duration"] = duration_per_day_full["duration"].fillna(0)
     return duration_per_day_full
 
-def main(action='overall', *, nbweeks=0):
+
+def main(action='overall', *, weeksbefore=0):
     """
     action can be :
 
-        overall : all pomodoros together in a plot
-
-        days : nb of hours per day overall
-
-        thisweek : nb of hours per day this week
-
-        lastweek : nb of hours per day last week
-
-        stats : some stats
-
-        weeks : nb of hours per week
-
-        today : nb hours today
-
-        yesterday : nb hours yesterday
+        overall : all pomodoros together in a plot.
+        week : nb of hours per day for a specific week.
+               if --weeksbefore=0, it corresponds to this week.
+               if --weeksbefore=1, it corresponds to last week.
+               if --weeksbefore=2, it corresponds to last last week.
+               etc.
+        thisweek : nb of hours per day this week.
+        lastweek : nb of hours per day last week.
+        stats : mean and standard deviation per day.
+        weeks : nb of hours per week.
+        today : nb hours today.
+        yesterday : nb hours yesterday.
     """
     data = load()
     if action == "overall":
         duration_per_day = load_duration_per_day(data)
-        duration_per_day.plot(figsize=(8, 8), x_compat=True)
+        duration_per_day['duration(hours)'] = duration_per_day['duration']
+        duration_per_day.plot(y='duration(hours)', x_compat=True)
+        #plt.xticks([], [])
         plt.show()
-    elif action in ("days", "thisweek", "lastweek"):
+    elif action in ("week", "thisweek", "lastweek"):
         if action == "thisweek":
             nbweeks = 0
         elif action == "lastweek":
             nbweeks = 1
         else:
-            nbweeks = nbweeks
+            nbweeks = weeksbefore
         D = data.copy()
         weekmap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         D["day"] = D["start"].map(lambda x:x.weekday())
@@ -92,8 +92,8 @@ def main(action='overall', *, nbweeks=0):
             kind="bar", 
             title="hours per day",
             figsize=(8, 8),
-            x="dayname", y="duration")
-        plt.title("total:{}".format(A.sum()))
+            x="dayname", y="duration (hours)")
+        plt.title("Total in the week : {:.3f} hours".format(A['duration'].sum()))
         plt.show()
     elif action == "stats":
         per_day = (data.groupby(by="day")).sum()/60.
@@ -107,8 +107,8 @@ def main(action='overall', *, nbweeks=0):
         data = data.reset_index()
         data = data.sort_values(by=['year', 'week'], ascending=[True, True])
         data['weekyear'] = data['week'] + (data['year'] - data['year'].min()) * 52
-        print(data)
-        data.plot(title="hours per week", x='weekyear', y='duration')
+        data['duration(hours)'] = data['duration']
+        data.plot(title="hours per week", x='weekyear', y='duration(hours)')
         plt.axhline(y=data['duration'].max(), c='green', ls='dashed')
         plt.show()
     elif action == "today" or action == "yesterday":

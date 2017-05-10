@@ -47,7 +47,7 @@ each time a pomodoro is performed, its recorded on a small text database in your
 
 ```bash
   pomostat overall
-  pomostat days
+  pomostat week
   pomostat thisweek
   pomostat lastweek
   pomostat stats
