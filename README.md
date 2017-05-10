@@ -55,3 +55,12 @@ each time a pomodoro is performed, its recorded on a small text database in your
   pomostat today
   pomostat yesterday
 ```
+
+Check ```pomostat --help``` for more information. 
+
+Here is an example of graph with ```pomostat thisweek```:
+
+![pomo](https://raw.githubusercontent.com/mehdidc/pomodoro/master/pomo.png)
+
+
+
