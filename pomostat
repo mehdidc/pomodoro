@@ -88,12 +88,13 @@ def main(action='overall', *, weeksbefore=0):
         D = D.groupby(by=("day", "dayname"))
         D = D.sum()/60.
         A = D
+        D['duration(hours)'] = D['duration']
         D = D.reset_index().plot(
             kind="bar", 
             title="hours per day",
             figsize=(8, 8),
-            x="dayname", y="duration (hours)")
-        plt.title("Total in the week : {:.3f} hours".format(A['duration'].sum()))
+            x="dayname", y="duration(hours)")
+        plt.title("Total in the week : {:.3f} hours".format(A['duration(hours)'].sum()))
         plt.show()
     elif action == "stats":
         per_day = (data.groupby(by="day")).sum()/60.
