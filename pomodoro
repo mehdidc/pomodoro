@@ -7,6 +7,15 @@ import subprocess
 from datetime import datetime
 import os
 
+try:
+    from PyQt5.QtWidgets import QMessageBox
+    from PyQt5.Qt import QApplication
+except ImportError:
+    has_qt = False
+else:
+    has_qt = True
+
+
 
 display = print
 this_dir = os.path.dirname(__file__)
@@ -16,10 +25,7 @@ DEV_NULL = open("/dev/null","w")
 
 
 def notify(title, content, more=''):
-    try:
-        from PyQt5.QtWidgets import QMessageBox
-        from PyQt5.Qt import QApplication
-    except ImportError:
+    if not has_qt:
         return
     app = QApplication(sys.argv)
     msg = QMessageBox()
