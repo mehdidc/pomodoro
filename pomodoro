@@ -83,7 +83,7 @@ def main(work=60, rest=5, *, repeat=10, alarm=True, notif=False):
         whether to send a message box each time a pomodoro is finished or started
     """
     i = 0
-    while i < repeat:
+    for _ in range(repeat):
         display("Work now")
         start = datetime.now()
         interrupted = tick(int(work)*60)
@@ -108,7 +108,6 @@ def main(work=60, rest=5, *, repeat=10, alarm=True, notif=False):
         if notif:
             notify('pomodoro', 'Finished rest, work now.')
         display("Cycle complete")
-        i += 1
 
 
 if __name__ == "__main__":
