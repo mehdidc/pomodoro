@@ -47,6 +47,7 @@ def main(action='overall', *, weeksbefore=0):
                if --weeksbefore=1, it corresponds to last week.
                if --weeksbefore=2, it corresponds to last last week.
                etc.
+        days : mean nb of hours per day, globally.
         thisweek : nb of hours per day this week.
         lastweek : nb of hours per day last week.
         stats : mean and standard deviation per day.
@@ -60,6 +61,27 @@ def main(action='overall', *, weeksbefore=0):
         duration_per_day['duration(hours)'] = duration_per_day['duration']
         duration_per_day.plot(y='duration(hours)', x_compat=True)
         #plt.xticks([], [])
+        plt.show()
+    elif action == "days":
+        D = data.copy()
+        weekmap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        D["date"] = D["start"].map(lambda x:x.date())
+        D = D.groupby(by="date").sum().reset_index()
+        D["day"] = D["date"].map(lambda x:x.weekday())
+        D["dayname"] = D["date"].map(lambda x:weekmap[x.weekday()])
+        D = D.groupby(by="dayname")
+        D = D.mean()/60.
+        D['duration(hours)'] = D['duration']
+        D = D.reset_index()
+        D['weekday'] = D['dayname'].map(lambda d:weekmap.index(d))
+        D = D.sort_values(by='weekday')
+        print(D)
+        D = D.plot(
+            kind="bar", 
+            title="hours per day",
+            figsize=(8, 8),
+            x="dayname", y="duration(hours)")
+        plt.title("Per day hours")
         plt.show()
     elif action in ("week", "thisweek", "lastweek"):
         if action == "thisweek":
@@ -107,6 +129,7 @@ def main(action='overall', *, weeksbefore=0):
         data = data.sort_values(by=['year', 'week'], ascending=[True, True])
         data['weekyear'] = data['week'] + (data['year'] - data['year'].min()) * 52
         data['duration(hours)'] = data['duration']
+        print(data)
         data.plot(title="hours per week", x='weekyear', y='duration(hours)')
         plt.axhline(y=data['duration'].max(), c='green', ls='dashed')
         plt.show()
