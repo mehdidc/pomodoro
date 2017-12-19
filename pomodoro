@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # Adapted from : http://code.activestate.com/recipes/577358-pomodoro-timer/
+from __future__ import print_function
 from clize import run
+from sigtools import modifiers
 import sys
 import time
 import subprocess
@@ -34,7 +36,7 @@ def notify(title, content, more=''):
     msg.setWindowTitle(title)
     msg.setDetailedText(more)
     msg.show()
-    app.exec()
+    app.exec_()
 
 
 def tick(duration):
@@ -68,17 +70,21 @@ def write_pomo(start, stop, tag):
     fd.write(line)
     fd.close()
 
-
-def main(work=60, rest=5, *, repeat=10, alarm=True, notif=False):
+@modifiers.kwoargs('repeat', 'alarm', 'notif')
+def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
     """
     work : int
         nb of minuntes of work
+
     rest : int
         nb of minutes of rest
+
     repeat : int
         nb of cycles work-rest to do
+
     alarm : bool
         whether to play an alarm each time a pomodoro is finished or started
+
     notif : bool
         whether to send a message box each time a pomodoro is finished or started
     """

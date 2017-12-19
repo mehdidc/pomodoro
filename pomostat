@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime
 from datetime import timedelta
 import calendar
+from sigtools import modifiers
 
 from clize import run
 
@@ -37,7 +38,8 @@ def load_duration_per_day_full(duration_per_day):
     return duration_per_day_full
 
 
-def main(action='overall', *, weeksbefore=0):
+@modifiers.kwoargs('weeksbefore')
+def main(action='overall', weeksbefore=0):
     """
     action can be :
 
