@@ -22,8 +22,8 @@ else:
 display = print
 this_dir = os.path.dirname(__file__)
 ALARM = "{}/../../clock.mp3".format(this_dir)
-DATA_FILENAME = os.getenv("HOME") + "/.pomodoro"
-DEV_NULL = open("/dev/null","w")
+DATA_FILENAME = os.path.expanduser("~/.pomodoro")
+DEV_NULL = open(os.devnull,"w")
 
 
 def notify(title, content, more=''):
