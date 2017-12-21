@@ -32,8 +32,10 @@ def load_duration_per_day(data):
 def load_duration_per_day_full(duration_per_day):
     d = pd.date_range(duration_per_day.index[0], duration_per_day.index[-1])
     e = pd.DataFrame(index=d)
-    duration_per_day_full = pd.merge(e, duration_per_day, how='left', left_index=True, right_index=True)
-    duration_per_day_full["duration"] = duration_per_day_full["duration"].fillna(0)
+    duration_per_day_full = pd.merge(
+        e, duration_per_day, how='left', left_index=True, right_index=True)
+    duration_per_day_full["duration"] = duration_per_day_full[
+        "duration"].fillna(0)
     return duration_per_day_full
 
 
@@ -65,20 +67,21 @@ def main(action='overall', weeksbefore=0):
         plt.show()
     elif action == "days":
         D = data.copy()
-        weekmap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        D["date"] = D["start"].map(lambda x:x.date())
+        weekmap = ["Monday", "Tuesday", "Wednesday",
+                   "Thursday", "Friday", "Saturday", "Sunday"]
+        D["date"] = D["start"].map(lambda x: x.date())
         D = D.groupby(by="date").sum().reset_index()
-        D["day"] = D["date"].map(lambda x:x.weekday())
-        D["dayname"] = D["date"].map(lambda x:weekmap[x.weekday()])
+        D["day"] = D["date"].map(lambda x: x.weekday())
+        D["dayname"] = D["date"].map(lambda x: weekmap[x.weekday()])
         D = D.groupby(by="dayname")
-        D = D.mean()/60.
+        D = D.mean() / 60.
         D['duration(hours)'] = D['duration']
         D = D.reset_index()
-        D['weekday'] = D['dayname'].map(lambda d:weekmap.index(d))
+        D['weekday'] = D['dayname'].map(lambda d: weekmap.index(d))
         D = D.sort_values(by='weekday')
         print(D)
         D = D.plot(
-            kind="bar", 
+            kind="bar",
             title="hours per day",
             figsize=(8, 8),
             x="dayname", y="duration(hours)")
@@ -92,43 +95,49 @@ def main(action='overall', weeksbefore=0):
         else:
             nbweeks = weeksbefore
         D = data.copy()
-        weekmap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        D["day"] = D["start"].map(lambda x:x.weekday())
-        D["dayname"] = D["start"].map(lambda x:weekmap[x.weekday()])
+        weekmap = ["Monday", "Tuesday", "Wednesday",
+                   "Thursday", "Friday", "Saturday", "Sunday"]
+        D["day"] = D["start"].map(lambda x: x.weekday())
+        D["dayname"] = D["start"].map(lambda x: weekmap[x.weekday()])
 
         sum_up = False
-        previous_weeks = nbweeks# if -1 consider previous_n_weeks, if >= 0 consider current week for 0, then previous week etc
-        last_monday = (datetime.today().date()) - timedelta(days=datetime.today().weekday())
+        # if -1 consider previous_n_weeks, if >= 0 consider current week for 0,
+        # then previous week etc
+        previous_weeks = nbweeks
+        last_monday = (datetime.today().date()) - \
+            timedelta(days=datetime.today().weekday())
         last_monday -= previous_weeks * timedelta(days=7)
         next_sunday = last_monday + timedelta(days=6)
         next_monday = last_monday + timedelta(days=7)
         if previous_weeks >= 0:
-            D = D[D.start>=last_monday]
+            D = D[D.start >= last_monday]
         if sum_up is False:
-            D = D[D.start< next_monday]
+            D = D[D.start < next_monday]
         D = D.groupby(by=("day", "dayname"))
-        D = D.sum()/60.
+        D = D.sum() / 60.
         A = D
         D['duration(hours)'] = D['duration']
         D = D.reset_index().plot(
-            kind="bar", 
+            kind="bar",
             title="hours per day",
             figsize=(8, 8),
             x="dayname", y="duration(hours)")
-        plt.title("Total in the week : {:.3f} hours".format(A['duration(hours)'].sum()))
+        plt.title("Total in the week : {:.3f} hours".format(
+            A['duration(hours)'].sum()))
         plt.show()
     elif action == "stats":
-        per_day = (data.groupby(by="day")).sum()/60.
+        per_day = (data.groupby(by="day")).sum() / 60.
         print("per day : {}+/-{}".format(per_day.values.mean(), per_day.values.std()))
     elif action == "weeks":
         week = lambda x: x.isocalendar()[1]
         year = lambda x: x.isocalendar()[0]
         data['week'] = data['day'].apply(week)
         data['year'] = data['day'].apply(year)
-        data = data.groupby(('week', 'year')).sum()/60
+        data = data.groupby(('week', 'year')).sum() / 60
         data = data.reset_index()
         data = data.sort_values(by=['year', 'week'], ascending=[True, True])
-        data['weekyear'] = data['week'] + (data['year'] - data['year'].min()) * 52
+        data['weekyear'] = data['week'] + \
+            (data['year'] - data['year'].min()) * 52
         data['duration(hours)'] = data['duration']
         print(data)
         data.plot(title="hours per week", x='weekyear', y='duration(hours)')

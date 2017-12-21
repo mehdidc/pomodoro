@@ -18,12 +18,11 @@ else:
     has_qt = True
 
 
-
 display = print
 this_dir = os.path.dirname(__file__)
 ALARM = "{}/../../clock.mp3".format(this_dir)
 DATA_FILENAME = os.path.expanduser("~/.pomodoro")
-DEV_NULL = open(os.devnull,"w")
+DEV_NULL = open(os.devnull, "w")
 
 
 def notify(title, content, more=''):
@@ -70,6 +69,7 @@ def write_pomo(start, stop, tag):
     fd.write(line)
     fd.close()
 
+
 @modifiers.kwoargs('repeat', 'alarm', 'notif')
 def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
     """
@@ -92,7 +92,7 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
     for _ in range(repeat):
         display("Work now")
         start = datetime.now()
-        interrupted = tick(int(work)*60)
+        interrupted = tick(int(work) * 60)
         if interrupted:
             break
         stop = datetime.now()
@@ -103,7 +103,7 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
             notify('pomodoro', 'Finished pomo, rest now.')
         display("Rest now")
         start = datetime.now()
-        interrupted = tick(int(rest)*60)
+        interrupted = tick(int(rest) * 60)
         if interrupted:
             break
         stop = datetime.now()
