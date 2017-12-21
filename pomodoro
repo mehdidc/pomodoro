@@ -86,9 +86,9 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
         whether to play an alarm each time a pomodoro is finished or started
 
     notif : bool
-        whether to send a message box each time a pomodoro is finished or started
+        whether to send a message box each time a pomodoro is finished or
+        started
     """
-    i = 0
     for _ in range(repeat):
         display("Work now")
         start = datetime.now()
