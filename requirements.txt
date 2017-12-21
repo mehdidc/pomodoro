@@ -1,3 +1,4 @@
 clize
 sigtools
 pandas
+matplotlib

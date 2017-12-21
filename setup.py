@@ -24,5 +24,5 @@ setup(
     scripts=['pomodoro', 'pomostat'],
     include_package_data=True,
     data_files=['clock.mp3'],
-    install_requires=['clize', 'sigtools', 'pandas'],
+    install_requires=['clize', 'sigtools', 'pandas', 'matplotlib'],
 )
