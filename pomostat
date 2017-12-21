@@ -12,12 +12,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
-filename = os.path.join(os.getenv("HOME"), ".pomodoro")
+DATA_FILENAME = os.path.expanduser("~/.pomodoro")
 
 
 def load():
-    data = pd.read_csv(filename, parse_dates=["start"])
+    data = pd.read_csv(DATA_FILENAME, parse_dates=["start"])
     data = (data.loc[data["work"] == "work"])
     data["day"] = data["start"]
     data["day"] = data["day"].apply(lambda x: x.date())
