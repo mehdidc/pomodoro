@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import os
-import argparse
 from datetime import datetime
 from datetime import timedelta
-import calendar
 from sigtools import modifiers
 
 from clize import run
@@ -62,7 +60,6 @@ def main(action='overall', weeksbefore=0):
         duration_per_day = load_duration_per_day(data)
         duration_per_day['duration(hours)'] = duration_per_day['duration']
         duration_per_day.plot(y='duration(hours)', x_compat=True)
-        #plt.xticks([], [])
         plt.show()
     elif action == "days":
         D = data.copy()
@@ -106,7 +103,6 @@ def main(action='overall', weeksbefore=0):
         last_monday = (datetime.today().date()) - \
             timedelta(days=datetime.today().weekday())
         last_monday -= previous_weeks * timedelta(days=7)
-        next_sunday = last_monday + timedelta(days=6)
         next_monday = last_monday + timedelta(days=7)
         if previous_weeks >= 0:
             D = D[D.start >= last_monday]
@@ -126,10 +122,14 @@ def main(action='overall', weeksbefore=0):
         plt.show()
     elif action == "stats":
         per_day = (data.groupby(by="day")).sum() / 60.
-        print("per day : {}+/-{}".format(per_day.values.mean(), per_day.values.std()))
+        print("per day : {}+/-{}".format(per_day.values.mean(),
+                                         per_day.values.std()))
     elif action == "weeks":
-        week = lambda x: x.isocalendar()[1]
-        year = lambda x: x.isocalendar()[0]
+        def week(x):
+            return x.isocalendar()[1]
+
+        def year(x):
+            x.isocalendar()[0]
         data['week'] = data['day'].apply(week)
         data['year'] = data['day'].apply(year)
         data = data.groupby(('week', 'year')).sum() / 60
@@ -150,6 +150,7 @@ def main(action='overall', weeksbefore=0):
         today = datetime.today().date() - timedelta(d)
         D = data[data["start"] >= today]
         print("{:.3f} h".format(D["duration"].sum() / 60.))
+
 
 if __name__ == "__main__":
     run(main)
