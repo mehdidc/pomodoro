@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import os
 from datetime import datetime
 from datetime import timedelta
@@ -10,9 +11,30 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 DATA_FILENAME = os.path.expanduser("~/.pomodoro")
+weekmap = [
+    "Monday", "Tuesday", "Wednesday",
+    "Thursday", "Friday", "Saturday", "Sunday"
+]
+day_format = '"%A %d. %B %Y"'
 
 
 def load():
+    """
+    Load a pomodoro stats file into pandas dataframe
+    Each row is a pomodoro 'work' session.
+    The 'rest' sessions are ignored.
+    The columns are:
+        - start : starting datetime
+        - end : ending datetime
+        - duration : duration in seconds
+        - day : starting date (without time)
+
+
+    Returns
+    -------
+
+    pandas DataFrame
+    """
     data = pd.read_csv(DATA_FILENAME, parse_dates=["start"])
     data = (data.loc[data["work"] == "work"])
     data["day"] = data["start"]
@@ -21,32 +43,39 @@ def load():
 
 
 def load_duration_per_day(data):
+    """
+    Given a pandas dataframe `data` obtained with `load`,  this
+    function returns a pandas series with the number of hours of
+    pomodoros per day. Each element of the series corresponds to
+    a day with its corresponding number of hours of pomodoros.
+
+    Parameters
+    ----------
+
+    data : pandas DataFrame
+
+    Returns
+    -------
+
+    pandas Series
+    """
     duration_per_day = data.groupby("day").sum() / 60.
     duration_per_day.index = pd.to_datetime(duration_per_day.index)
     return duration_per_day
 
 
-def load_duration_per_day_full(duration_per_day):
-    d = pd.date_range(duration_per_day.index[0], duration_per_day.index[-1])
-    e = pd.DataFrame(index=d)
-    duration_per_day_full = pd.merge(
-        e, duration_per_day, how='left', left_index=True, right_index=True)
-    duration_per_day_full["duration"] = duration_per_day_full[
-        "duration"].fillna(0)
-    return duration_per_day_full
-
-
-@modifiers.kwoargs('weeksbefore')
-def main(action='overall', weeksbefore=0):
+@modifiers.kwoargs('weekof')
+def main(action='overall', weekof='today'):
     """
     action can be :
 
         overall : all pomodoros together in a plot.
         week : nb of hours per day for a specific week.
-               if --weeksbefore=0, it corresponds to this week.
-               if --weeksbefore=1, it corresponds to last week.
-               if --weeksbefore=2, it corresponds to last last week.
-               etc.
+            it accepts as an option "weekof" to specify the week.
+            weekof can be any day of the week you want to visualize
+            formatted as a python date.
+            Example: --weekof='2018-01-01' will correspond to the week
+            which the first january 2018 belongs to.
         days : mean nb of hours per day, globally.
         thisweek : nb of hours per day this week.
         lastweek : nb of hours per day last week.
@@ -54,6 +83,16 @@ def main(action='overall', weeksbefore=0):
         weeks : nb of hours per week.
         today : nb hours today.
         yesterday : nb hours yesterday.
+
+    Examples usage
+    --------------
+
+    > pomostat overall
+    > pomostat thisweek
+    > pomostat lastweek
+    > pomostat week --weekof='today' # equivalent to pomostat thisweek
+    > pomostat week --weekof='2018-01-01' # week of first january
+    > pomostat yesterday
     """
     data = load()
     if action == "overall":
@@ -63,9 +102,6 @@ def main(action='overall', weeksbefore=0):
         plt.show()
     elif action == "days":
         D = data.copy()
-        weekmap = ["Monday", "Tuesday", "Wednesday",
-                   "Thursday", "Friday", "Saturday", "Sunday"]
-        D["date"] = D["start"].map(lambda x: x.date())
         D = D.groupby(by="date").sum().reset_index()
         D["day"] = D["date"].map(lambda x: x.weekday())
         D["dayname"] = D["date"].map(lambda x: weekmap[x.weekday()])
@@ -84,41 +120,48 @@ def main(action='overall', weeksbefore=0):
         plt.title("Per day hours")
         plt.show()
     elif action in ("week", "thisweek", "lastweek"):
-        if action == "thisweek":
-            nbweeks = 0
-        elif action == "lastweek":
-            nbweeks = 1
-        else:
-            nbweeks = weeksbefore
         D = data.copy()
-        weekmap = ["Monday", "Tuesday", "Wednesday",
-                   "Thursday", "Friday", "Saturday", "Sunday"]
         D["day"] = D["start"].map(lambda x: x.weekday())
         D["dayname"] = D["start"].map(lambda x: weekmap[x.weekday()])
 
-        sum_up = False
-        # if -1 consider previous_n_weeks, if >= 0 consider current week for 0,
-        # then previous week etc
-        previous_weeks = nbweeks
-        last_monday = (datetime.today().date()) - \
-            timedelta(days=datetime.today().weekday())
-        last_monday -= previous_weeks * timedelta(days=7)
-        next_monday = last_monday + timedelta(days=7)
-        if previous_weeks >= 0:
-            D = D[D.start >= last_monday]
-        if sum_up is False:
-            D = D[D.start < next_monday]
+        if action == 'thisweek':
+            weekof = 'today'
+        elif action == 'lastweek':
+            today = datetime.today()
+            last_monday = (today - timedelta(days=today.weekday()))
+            last_sunday = last_monday - timedelta(days=1)
+            weekof = str(last_sunday)
+        else:
+            pass  # in that case just use weekof
+
+        day_of_week = pd.to_datetime(weekof)
+        last_monday_of_week = (
+            day_of_week - timedelta(days=day_of_week.weekday()))
+        first_day_of_week = last_monday_of_week
+        last_day_of_week = first_day_of_week + timedelta(days=6)
+        D = D[D.start >= first_day_of_week]
+        D = D[D.start <= last_day_of_week]
+        if len(D) == 0:
+            print('The week from {} to {} has no recorded pomodoro '
+                  'sessions.'.format(
+                    first_day_of_week.date(),
+                    last_day_of_week.date()))
+            sys.exit(0)
         D = D.groupby(by=("day", "dayname"))
         D = D.sum() / 60.
-        A = D
+        total_week_hours = D['duration'].sum()
         D['duration(hours)'] = D['duration']
+
         D = D.reset_index().plot(
             kind="bar",
             title="hours per day",
             figsize=(8, 8),
             x="dayname", y="duration(hours)")
-        plt.title("Total in the week : {:.3f} hours".format(
-            A['duration(hours)'].sum()))
+        plt.title("Total in the week : {:.3f} hours. Week of {} to {}".format(
+            total_week_hours,
+            first_day_of_week.strftime(day_format),
+            last_day_of_week.strftime(day_format),
+        ))
         plt.show()
     elif action == "stats":
         per_day = (data.groupby(by="day")).sum() / 60.
@@ -144,13 +187,15 @@ def main(action='overall', weeksbefore=0):
         plt.axhline(y=data['duration'].max(), c='green', ls='dashed')
         plt.show()
     elif action == "today" or action == "yesterday":
-        if action == "yesterday":
-            d = 1
-        else:
-            d = 0
+        d = 1 if action == "yesterday" else 0
         today = datetime.today().date() - timedelta(d)
         D = data[data["start"] >= today]
         print("{:.3f} h".format(D["duration"].sum() / 60.))
+    else:
+        print('Action not recognized. It should be : "overall" or '
+              '"week" or "days" or "thisweek" or "lastweek" or'
+              '"stats" or "weeks" or "today" or "yesterday".')
+        sys.exit(1)
 
 
 if __name__ == "__main__":
