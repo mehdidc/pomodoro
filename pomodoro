@@ -20,10 +20,12 @@ else:
 
 display = print
 this_dir = os.path.dirname(__file__)
-ALARM = "{}/../../clock.mp3".format(this_dir)
+ALARM_FILE = "clock.mp3".format(this_dir)
+ALARM_CMD_FFPLAY = ["ffplay","-nodisp","-autoexit","-t", "1"] #-t option defines how many seconds will be played
+ALARM_CMD_MPG123 = ["mpg123"]
+ALARM_CMD = ALARM_CMD_MPG123
 DATA_FILENAME = os.path.expanduser("~/.pomodoro")
 DEV_NULL = open(os.devnull, "w")
-
 
 def notify(title, content, more=''):
     if not has_qt:
@@ -50,7 +52,7 @@ def tick(duration):
 
 
 def play_alarm(filename):
-    cmd = ["mpg123", filename]
+    cmd = ALARM_CMD + [filename]
     try:
         p = subprocess.Popen(cmd, stdout=DEV_NULL, stderr=subprocess.PIPE)
         p.wait()
@@ -98,7 +100,7 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
         stop = datetime.now()
         write_pomo(start, stop, "work")
         if alarm:
-            play_alarm(ALARM)
+            play_alarm(ALARM_FILE)
         if notif:
             notify('pomodoro', 'Finished pomo, rest now.')
         display("Rest now")
@@ -110,7 +112,7 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
         write_pomo(start, stop, "rest")
 
         if alarm:
-            play_alarm(ALARM)
+            play_alarm(ALARM_FILE)
         if notif:
             notify('pomodoro', 'Finished rest, work now.')
         display("Cycle complete")
