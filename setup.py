@@ -1,14 +1,25 @@
 from setuptools import setup
 
+description = "Simple command line pomodoro app with visualization of statistics"
+long_description = """
+Simple command line pomodoro app with visualization of statistics.
+
+The Pomodoro technique is a time management technique for improving productivity.
+Check (https://en.wikipedia.org/wiki/Pomodoro_Technique) for more details.
+The code is based on : http://code.activestate.com/recipes/577358-pomodoro-timer/
+"""
+
+
 setup(
-    name="pomodoro",
-    version="0.1",
+    name="pomodoro-cli",
+    version="0.1.0",
     author="mehdi cherti",
     author_email="mehdicherti@gmail.com",
-    description=(""),
+    description=description,
+    long_description=long_description,
     license="MIT",
-    keywords="",
-    url="",
+    keywords="pomodoro productivity",
+    url="https://github.com/mehdidc/pomodoro",
     zip_safe=False,  # the package can run out of an .egg file
     classifiers=['Intended Audience :: Science/Research',
                  'Intended Audience :: Developers',
