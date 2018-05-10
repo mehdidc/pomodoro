@@ -11,11 +11,18 @@ The code is based on : <http://code.activestate.com/recipes/577358-pomodoro-time
 ## How to install ?
 
 ```bash
+    pip install pomodoro-cli
+```
+
+OR
+
+```bash
     git clone https://github.com/mehdidc/pomodoro
     cd pomodoro
     pip install -r requirements.txt
     python setup.py install
 ```
+
 
 ## How to use it?
 
