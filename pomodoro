@@ -20,7 +20,16 @@ else:
 
 display = print
 this_dir = os.path.dirname(__file__)
-ALARM_FILE = os.path.join(this_dir, "..", "..", "clock.mp3")
+ALARM_FILE_DIRS = [
+    '.',
+    sys.prefix,
+    os.path.join(this_dir, "..", "..", "clock.mp3"),
+]
+ALARM_FILENAME = 'clock.mp3'
+for alarm_file_dir in ALARM_FILE_DIRS:
+    ALARM_FILE = os.path.join(alarm_file_dir, ALARM_FILENAME)
+    if os.path.exists(ALARM_FILE):
+        break
 ALARM_CMD_FFPLAY = ["ffplay", "-nodisp", "-autoexit"]
 ALARM_CMD_MPG123 = ["mpg123"]
 ALARM_CMDS = (ALARM_CMD_MPG123, ALARM_CMD_FFPLAY)
