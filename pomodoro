@@ -20,12 +20,13 @@ else:
 
 display = print
 this_dir = os.path.dirname(__file__)
-ALARM_FILE = "clock.mp3".format(this_dir)
-ALARM_CMD_FFPLAY = ["ffplay","-nodisp","-autoexit","-t", "1"] #-t option defines how many seconds will be played
+ALARM_FILE = os.path.join(this_dir, "..", "..", "clock.mp3")
+ALARM_CMD_FFPLAY = ["ffplay", "-nodisp", "-autoexit"]
 ALARM_CMD_MPG123 = ["mpg123"]
-ALARM_CMD = ALARM_CMD_MPG123
+ALARM_CMDS = (ALARM_CMD_MPG123, ALARM_CMD_FFPLAY)
 DATA_FILENAME = os.path.expanduser("~/.pomodoro")
 DEV_NULL = open(os.devnull, "w")
+
 
 def notify(title, content, more=''):
     if not has_qt:
@@ -52,12 +53,17 @@ def tick(duration):
 
 
 def play_alarm(filename):
-    cmd = ALARM_CMD + [filename]
-    try:
-        p = subprocess.Popen(cmd, stdout=DEV_NULL, stderr=subprocess.PIPE)
-        p.wait()
-    except FileNotFoundError:
-        pass
+    for alarm_cmd in ALARM_CMDS:
+        cmd = alarm_cmd + [filename]
+        try:
+            p = subprocess.Popen(cmd, stdout=DEV_NULL, stderr=subprocess.PIPE)
+            p.wait()
+        except FileNotFoundError:
+            # error, try the next alarm cmd
+            continue
+        else:
+            # successful
+            return
 
 
 def write_pomo(start, stop, tag):
