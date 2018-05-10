@@ -12,7 +12,7 @@ The code is based on : http://code.activestate.com/recipes/577358-pomodoro-timer
 
 setup(
     name="pomodoro-cli",
-    version="0.1.1",
+    version="0.1.2",
     author="mehdi cherti",
     author_email="mehdicherti@gmail.com",
     description=description,
