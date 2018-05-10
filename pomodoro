@@ -68,7 +68,7 @@ def play_alarm(filename):
         try:
             p = subprocess.Popen(cmd, stdout=DEV_NULL, stderr=subprocess.PIPE)
             p.wait()
-        except FileNotFoundError:
+        except OSError:
             # error, try the next alarm cmd
             continue
         else:
