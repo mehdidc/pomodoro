@@ -25,7 +25,8 @@ The code is based on : <http://code.activestate.com/recipes/577358-pomodoro-time
 
 will run pomodoro cycles of 60mins of work and 5mins of rest. 
 By default an alarm sound will be played at the end of pomodoros.
-**Warning** : alarm needs mpg123 (https://www.mpg123.de/)
+**Warning** : alarm needs either mpg123 (https://www.mpg123.de/) or 
+ffplay(https://ffmpeg.org/ffplay.html) to be installed.
 
 it can be disabled using:
   
@@ -51,6 +52,7 @@ each time a pomodoro is performed, its recorded on a small text database in your
   pomostat week
   pomostat thisweek
   pomostat lastweek
+  pomostat week --weekof='2018-01-01'
   pomostat stats
   pomostat weeks
   pomostat today
