@@ -19,11 +19,12 @@ else:
 
 
 display = print
-this_dir = os.path.dirname(__file__)
+script_dir = os.path.dirname(__file__)
 ALARM_FILE_DIRS = [
     '.',
+    script_dir,
     sys.prefix,
-    os.path.join(this_dir, "..", "..", "clock.mp3"),
+    os.path.join(script_dir, "..", "..", "clock.mp3"),
 ]
 ALARM_FILENAME = 'clock.mp3'
 for alarm_file_dir in ALARM_FILE_DIRS:
