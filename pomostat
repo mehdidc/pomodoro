@@ -189,6 +189,7 @@ def main(action='overall', weekof='today'):
     elif action == "today" or action == "yesterday":
         d = 1 if action == "yesterday" else 0
         today = datetime.today().date() - timedelta(d)
+        today = pd.to_datetime(today)
         D = data[data["start"] >= today]
         print("{:.3f} h".format(D["duration"].sum() / 60.))
     else:
