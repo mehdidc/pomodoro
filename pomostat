@@ -134,7 +134,7 @@ def main(action='overall', weekof='today'):
         else:
             pass  # in that case just use weekof
 
-        day_of_week = pd.to_datetime(weekof)
+        day_of_week = pd.to_datetime(pd.to_datetime(weekof).date())
         last_monday_of_week = (
             day_of_week - timedelta(days=day_of_week.weekday()))
         first_day_of_week = last_monday_of_week
@@ -147,7 +147,7 @@ def main(action='overall', weekof='today'):
                     first_day_of_week.date(),
                     last_day_of_week.date()))
             sys.exit(0)
-        D = D.groupby(by=("day", "dayname"))
+        D = D.groupby(by=["day", "dayname"])
         D = D.sum() / 60.
         total_week_hours = D['duration'].sum()
         D['duration(hours)'] = D['duration']
