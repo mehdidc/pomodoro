@@ -138,9 +138,9 @@ def main(action='overall', weekof='today'):
         last_monday_of_week = (
             day_of_week - timedelta(days=day_of_week.weekday()))
         first_day_of_week = last_monday_of_week
-        last_day_of_week = first_day_of_week + timedelta(days=6)
+        last_day_of_week = first_day_of_week + timedelta(days=7)
         D = D[D.start >= first_day_of_week]
-        D = D[D.start <= last_day_of_week]
+        D = D[D.start < last_day_of_week]
         if len(D) == 0:
             print('The week from {} to {} has no recorded pomodoro '
                   'sessions.'.format(
