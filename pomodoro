@@ -24,7 +24,7 @@ ALARM_FILE_DIRS = [
     '.',
     script_dir,
     sys.prefix,
-    os.path.join(script_dir, "..", "..", "clock.mp3"),
+    os.path.join(script_dir, "..", ".."),
 ]
 ALARM_FILENAME = 'clock.mp3'
 for alarm_file_dir in ALARM_FILE_DIRS:
