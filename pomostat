@@ -188,9 +188,11 @@ def main(action='overall', weekof='today'):
         plt.show()
     elif action == "today" or action == "yesterday":
         d = 1 if action == "yesterday" else 0
-        today = datetime.today().date() - timedelta(d)
-        today = pd.to_datetime(today)
-        D = data[data["start"] >= today]
+        day = datetime.today().date() - timedelta(d)
+        next_day = day + timedelta(1)
+        day = pd.to_datetime(day)
+        next_day = pd.to_datetime(next_day)
+        D = data[(data["start"] >= day) & (data["start"] < next_day)]
         print("{:.3f} h".format(D["duration"].sum() / 60.))
     else:
         print('Action not recognized. It should be : "overall" or '
