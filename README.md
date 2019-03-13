@@ -50,6 +50,13 @@ To do that, you can do:
 
 **Warning** : notif needs pyqt5 (https://pypi.python.org/pypi/PyQt5/5.8.2)
 
+Enable display of a command line countdown timer as follows:
+
+```bash
+  pomodoro 60 5 --timer=True
+```
+
+
 ## Statistics
 
 each time a pomodoro is performed, its recorded on a small text database in your HOME/.pomodoro. To visualize the statistics of your pomodoros, you can use pomostat. Here are some examples:
