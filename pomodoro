@@ -51,9 +51,12 @@ def notify(title, content, more=''):
     app.exec_()
 
 
-def tick(duration):
+def tick(duration, timer):
     try:
-        time.sleep(duration)
+        if timer:
+            cli_timer(duration)
+        else:
+            time.sleep(duration)
     except KeyboardInterrupt:
         display("Interrupting")
         interrupt = True
@@ -87,9 +90,18 @@ def write_pomo(start, stop, tag):
     fd.write(line)
     fd.close()
 
+def cli_timer(duration):
+    for remaining in range(duration, -1, -1):
+        sys.stdout.write("\r")
+        hours, rem = divmod(remaining, 3600)
+        mins, secs = divmod(rem, 60)
+        sys.stdout.write("Time remaining: {:0>2}:{:0>2}:{:0>2}".format(hours, mins, secs)) 
+        sys.stdout.flush()
+        time.sleep(1)
+    print('\n')
 
-@modifiers.kwoargs('repeat', 'alarm', 'notif')
-def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
+@modifiers.kwoargs('repeat', 'alarm', 'notif', 'timer')
+def main(work=60, rest=5, repeat=10, alarm=True, notif=False, timer=False):
     """
     work : int
         nb of minuntes of work
@@ -106,11 +118,14 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
     notif : bool
         whether to send a message box each time a pomodoro is finished or
         started
+
+    timer : bool
+        whether to have cli timer visible
     """
     for _ in range(repeat):
         display("Work now")
         start = datetime.now()
-        interrupted = tick(int(work) * 60)
+        interrupted = tick(int(work) * 60, timer)
         if interrupted:
             break
         stop = datetime.now()
@@ -121,7 +136,7 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False):
             notify('pomodoro', 'Finished pomo, rest now.')
         display("Rest now")
         start = datetime.now()
-        interrupted = tick(int(rest) * 60)
+        interrupted = tick(int(rest) * 60, timer)
         if interrupted:
             break
         stop = datetime.now()
