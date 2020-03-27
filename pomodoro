@@ -95,19 +95,25 @@ def cli_timer(duration):
         sys.stdout.write("\r")
         hours, rem = divmod(remaining, 3600)
         mins, secs = divmod(rem, 60)
-        sys.stdout.write("Time remaining: {:0>2}:{:0>2}:{:0>2}".format(hours, mins, secs)) 
+        sys.stdout.write("Time remaining: {:0>2}:{:0>2}:{:0>2}".format(hours, mins, secs))
         sys.stdout.flush()
         time.sleep(1)
     print('\n')
 
-@modifiers.kwoargs('repeat', 'alarm', 'notif', 'timer')
-def main(work=60, rest=5, repeat=10, alarm=True, notif=False, timer=False):
+@modifiers.kwoargs('long', 'cycles', 'repeat', 'alarm', 'notif', 'timer')
+def main(work=60, rest=5, long=15, cycles=4, repeat=10, alarm=True, notif=False, timer=False):
     """
     work : int
         nb of minuntes of work
 
     rest : int
         nb of minutes of rest
+
+    long : int
+        nb of minutes of long rest after completion of a set
+
+    cycles : int
+        nb of cycles in a set
 
     repeat : int
         nb of cycles work-rest to do
@@ -122,7 +128,7 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False, timer=False):
     timer : bool
         whether to have cli timer visible
     """
-    for _ in range(repeat):
+    for cycle in range(repeat):
         display("Work now")
         start = datetime.now()
         interrupted = tick(int(work) * 60, timer)
@@ -132,11 +138,20 @@ def main(work=60, rest=5, repeat=10, alarm=True, notif=False, timer=False):
         write_pomo(start, stop, "work")
         if alarm:
             play_alarm(ALARM_FILE)
-        if notif:
-            notify('pomodoro', 'Finished pomo, rest now.')
-        display("Rest now")
+
+        if (cycle + 1) % cycles == 0:
+            # If set complete, long rest
+            rest_time = int(long) * 60
+            if notif:
+                notify('pomodoro', 'Finished set, long rest now.')
+            display("Long rest now")
+        else:
+            rest_time = int(rest) * 60
+            if notif:
+                notify('pomodoro', 'Finished pomo, rest now.')
+            display("Rest now")
         start = datetime.now()
-        interrupted = tick(int(rest) * 60, timer)
+        interrupted = tick(rest_time, timer)
         if interrupted:
             break
         stop = datetime.now()
