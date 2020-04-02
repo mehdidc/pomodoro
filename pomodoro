@@ -8,6 +8,7 @@ import time
 import subprocess
 from datetime import datetime
 import os
+import configparser
 
 try:
     from PyQt5.QtWidgets import QMessageBox
@@ -35,7 +36,25 @@ ALARM_CMD_FFPLAY = ["ffplay", "-nodisp", "-autoexit"]
 ALARM_CMD_MPG123 = ["mpg123"]
 ALARM_CMDS = (ALARM_CMD_MPG123, ALARM_CMD_FFPLAY)
 DATA_FILENAME = os.path.expanduser("~/.pomodoro")
+CONFIG_FILENAME = os.path.expanduser("~/.pomodoro.conf")
 DEV_NULL = open(os.devnull, "w")
+
+
+# Parsing config file :
+config = configparser.ConfigParser()
+config.read(CONFIG_FILENAME)
+if 'DEFAULTS' not in config : #if the config doesn't exist or is of the wrong format
+    #writes the default config to the file
+    config['DEFAULTS'] = {'work':'60', 'rest':'5', 'repeat':'10', 'alarm':'True', 'notif':'False', 'timer':'False'}
+    with open(CONFIG_FILENAME, 'w') as configfile:
+        config.write(configfile)
+    config.read(CONFIG_FILENAME)
+work_default = config['DEFAULTS'].getint('work')
+rest_default = config['DEFAULTS'].getint('rest')
+repeat_default = config['DEFAULTS'].getint('repeat')
+alarm_default = config['DEFAULTS'].getboolean('alarm')
+notif_default = config['DEFAULTS'].getboolean('notif')
+timer_default = config['DEFAULTS'].getboolean('timer')
 
 
 def notify(title, content, more=''):
@@ -101,7 +120,7 @@ def cli_timer(duration):
     print('\n')
 
 @modifiers.kwoargs('long', 'cycles', 'repeat', 'alarm', 'notif', 'timer')
-def main(work=60, rest=5, long=15, cycles=4, repeat=10, alarm=True, notif=False, timer=False):
+def main(work=work_default, rest=rest_default, long=long_default, cycles=cycles_default, repeat=repeat_default, alarm=alarm_default, notif=notif_default, timer=timer_default):
     """
     work : int
         nb of minuntes of work
