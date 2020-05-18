@@ -2,3 +2,4 @@ clize
 sigtools
 pandas
 matplotlib
+configparser
